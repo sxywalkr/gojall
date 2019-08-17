@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "953482080513",
+    "firebase_url": "https://apprijal2019.firebaseio.com",
+    "project_id": "apprijal2019",
+    "storage_bucket": "apprijal2019.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953482080513:android:6ff721574581c2a8",
+        "android_client_info": {
+          "package_name": "com.apprijal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "953482080513-b9v9bl6e5hfasbvfcm4r6o4g1ern3a17.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdh8uQYh9upA_8cTYzFoONsIdi66su3yc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "953482080513-b9v9bl6e5hfasbvfcm4r6o4g1ern3a17.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953482080513:android:aaf5e139abf2dfd8",
+        "android_client_info": {
+          "package_name": "com.gojall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "953482080513-b9v9bl6e5hfasbvfcm4r6o4g1ern3a17.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdh8uQYh9upA_8cTYzFoONsIdi66su3yc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "953482080513-b9v9bl6e5hfasbvfcm4r6o4g1ern3a17.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
