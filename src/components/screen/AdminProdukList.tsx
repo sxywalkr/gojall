@@ -24,33 +24,8 @@ function AdminProduksList(props: IProps) {
     const { state, dispatch } = useContext(AppContext);
     const [loading, setLoading] = useState(true);
     const [produk, setProduk] = useState([]);
+    const [jumlahOrder, setJumlahOrder] = useState('');
     const [statusOrderAll, setStatusOrderAll] = useState('');
-
-    const _renderItem = ({ item }: any) => (
-        <Card key={item.idItem} style={{ marginVertical: 3 }}>
-            <Card.Content>
-                <Title>{item.namaItem} ({item.kategoriItem})</Title>
-                {!!state.appUser && state.appUser.userRole === 'Admin' &&
-                    <AdminProdukDetail2 navigation={props.navigation} selectedItem={item} />}
-                {!!state.appUser && state.appUser.userRole === 'Reseller' &&
-                    <UserProdukDetail navigation={props.navigation} selectedItem={item} />}
-                {!!state.appUser && state.appUser.userRole === 'Produksi' &&
-                    <ProduksiProdukDetail navigation={props.navigation} selectedItem={item} />}
-                {!!state.appUser && state.appUser.userRole === 'Owner' &&
-                    <OwnerProdukDetail navigation={props.navigation} selectedItem={item} />}
-            </Card.Content>
-        </Card>
-    )
-
-    const _keyExtractor = (item: any) => item.idItem;
-
-    const _onCloseOrder = () => {
-        fb.db.ref('items/admin')
-            .update({
-                statusOrderAll: 'Close Order'
-            });
-        setStatusOrderAll('');
-    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -82,17 +57,71 @@ function AdminProduksList(props: IProps) {
             setLoading(false);
         };
         fetchData();
-
         return () => {
             fb.db.ref('items/admin').off;
         };
     }, [statusOrderAll]);
 
-    // console.log(statusOrderAll);
+    useEffect(() => {
+        const fetchData = async () => {
+            const res = await fb.db.ref('items/admin/jumlahOrder').once('value');
+            setJumlahOrder(res.val());
+            setLoading(false);
+        };
+        fetchData();
+        return () => {
+            fb.db.ref('items/admin').off;
+        };
+    }, [loading]);
+
+    const _renderItem = ({ item }: any) => (
+        <Card key={item.idItem} style={{ marginVertical: 3 }}>
+            <Card.Content>
+                <Title>{item.namaItem} ({item.kategoriItem})</Title>
+                {!!state.appUser && state.appUser.userRole === 'Admin' &&
+                    <AdminProdukDetail2 navigation={props.navigation} selectedItem={item} />}
+                {!!state.appUser && state.appUser.userRole === 'Reseller' &&
+                    <UserProdukDetail navigation={props.navigation} selectedItem={item} />}
+                {!!state.appUser && state.appUser.userRole === 'Produksi' &&
+                    <ProduksiProdukDetail navigation={props.navigation} selectedItem={item} />}
+                {!!state.appUser && state.appUser.userRole === 'Owner' &&
+                    <OwnerProdukDetail navigation={props.navigation} selectedItem={item} />}
+            </Card.Content>
+        </Card>
+    )
+
+    const _keyExtractor = (item: any) => item.idItem;
+
+    const _onCloseOrder = () => {
+        fb.db.ref('items/admin')
+            .update({
+                statusOrderAll: 'Close Order'
+            });
+        setStatusOrderAll('');
+    }
+
+    const _onOpenOrderAll = () => {
+        fb.db.ref('items/admin')
+            .update({
+                statusOrderAll: 'Open Order All'
+            });
+        produk.forEach((el: any) => {
+            // console.log(el)
+            fb.db.ref('items/admin/' + el.idItem)
+                .update({
+                    jumlah1Total: 0,
+                    jumlah2Total: 0,
+                    statusOrder: 'Open Order',
+                    statusProduksi: 'Update stok Produksi NOK'
+                });
+        })
+        setStatusOrderAll('');
+    }
+
+    // console.log(produk)
 
     return (
         <Container>
-
             <ScrollView style={{ width: '100%' }}>
                 <FlatList
                     data={produk}
@@ -100,21 +129,19 @@ function AdminProduksList(props: IProps) {
                     renderItem={_renderItem}
                 />
             </ScrollView>
-            <View>
-                {!!state.appUser && state.appUser.userRole === 'Admin' && statusOrderAll === 'Open Order' &&
+            <View style={{ width: '100%' }}>
+                {!!state.appUser && state.appUser.userRole === 'Admin' && statusOrderAll === 'Open Order All' && parseInt(jumlahOrder) !== 0 &&
                     <Button icon="add-circle-outline" mode="contained"
                         onPress={() => _onCloseOrder()}
-                    // disabled={statusOrderAll === 'Open Order' ? false : true}
                     >
                         Close Order
                 </Button>}
-                {/* {statusOrderAll === 'Close Order' &&
+                {!!state.appUser && state.appUser.userRole === 'Admin' && statusOrderAll === 'Close Order' && parseInt(jumlahOrder) === 0 &&
                     <Button icon="add-circle-outline" mode="contained"
-                      onPress={() => _onKonfirmasiOrderKeOwner()}
-                    //     disabled={statusOrder === 'Close Order' ? false : true}
+                        onPress={() => _onOpenOrderAll()}
                     >
-                        Proses order, konfirmasi ke Owner
-                </Button>} */}
+                        Open Order
+                </Button>}
             </View>
 
         </Container>

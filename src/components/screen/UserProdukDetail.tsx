@@ -34,6 +34,7 @@ function UserProdukDetail(props: IProps) {
   const [statusOrder, setStatusOrder] = useState('');
   const [statusOrderItem, setStatusOrderItem] = useState('');
   const [nomorResi, setNomorResi] = useState('');
+  const [jumlahOrder, setJumlahOrder] = useState('0');
   const { state, dispatch } = useContext(AppContext);
   const [statusOrderAll, setStatusOrderAll] = useState('');
   const r = props.selectedItem;
@@ -63,7 +64,7 @@ function UserProdukDetail(props: IProps) {
     fetchData4();
     const fetchData5 = async () => {
       const res5 = await fb.db.ref('items/admin/' + r.idItem + '/' + state.appUser.userId + '/statusOrderItem').once('value');
-      setStatusOrderItem(res5.val() ? res5.val() : 'NOK');
+      setStatusOrderItem(res5.val() ? res5.val() : '---');
     };
     fetchData5();
     const fetchData6 = async () => {
@@ -90,6 +91,45 @@ function UserProdukDetail(props: IProps) {
     };
   }, [statusOrderAll]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fb.db.ref('items/admin/' + r.idItem + 'statusOrder').once('value');
+      setStatusOrder(res.val());
+      setLoading(false);
+    };
+    fetchData();
+    setLoading(false);
+    return () => {
+      fb.db.ref('items/admin').off;
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fb.db.ref('items/admin/' + r.idItem + '/' + state.appUser.userId + '/statusOrderItem').once('value');
+      setStatusOrderItem(res.val());
+      setLoading(false);
+    };
+    fetchData();
+
+    return () => {
+      fb.db.ref('items/admin').off;
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fb.db.ref('items/admin/jumlahOrder').once('value');
+      setJumlahOrder(res.val());
+      setLoading(false);
+    };
+    fetchData();
+
+    return () => {
+      fb.db.ref('items/admin').off;
+    };
+  }, [loading]);
+
   const _onSubmit = () => {
     // * save to firebase 
     fb.db.ref('items/admin/' + r.idItem + '/' + state.appUser.userId)
@@ -98,11 +138,15 @@ function UserProdukDetail(props: IProps) {
         userName: state.appUser.userName,
         jumlah2Item: parseInt(txtJumlahPesan),
         jumlah2ItemOrder: parseInt('0'),
-        statusOrderItem: 'Pembayaran NOK'
+        statusOrderItem: 'Barang dipesan'
       });
     fb.db.ref('items/admin/' + r.idItem)
       .update({
         jumlah2Total: parseInt(produk) - parseInt(produk2) + parseInt(txtJumlahPesan),
+      });
+    fb.db.ref('items/admin')
+      .update({
+        jumlahOrder: parseInt(jumlahOrder) + 1,
       });
     setLoading(true);
     setJumlah2ItemOrder('');
@@ -116,8 +160,24 @@ function UserProdukDetail(props: IProps) {
         // statusOrder: 'Order OK, konfirmasi ke Reseller',
         statusOrderItem: 'Pembayaran Selesai, menunggu verifikasi Admin'
       });
+    setLoading(true);
     // props.navigation.goBack();
   }
+
+  const _onBarangDiterima = (s: any) => {
+    fb.db.ref('items/admin/' + s.idItem + '/' + state.appUser.userId)
+      .update({
+        statusOrderItem: 'Barang diterima'
+      });
+    fb.db.ref('items/admin')
+      .update({
+        jumlahOrder: parseInt(jumlahOrder) - 1,
+      });
+
+    setLoading(true);
+  }
+
+  // console.log(jumlahOrder);
 
   return (
     <View>{loading === true ? <ActivityIndicator animating={true} /> :
@@ -125,32 +185,37 @@ function UserProdukDetail(props: IProps) {
         <Text>Harga Item: {r.harga2Item}</Text>
         <Text>Jumlah Pre Order: {produk2}</Text>
         <Text>Jumlah Fix Order: {jumlah2ItemOrder}</Text>
-        <Text>Status Pembayaran: {statusOrderItem}</Text>
+        <Text>Status: {statusOrderItem}</Text>
         <Text>Nomor Resi: {nomorResi}</Text>
         <Space5 />
         {
-          statusOrderAll === 'Open Order' && (!!statusOrder && statusOrder === 'Open Order') ?
-            <View>
-              <TextInput
-                label='Jumlah Pesan'
-                keyboardType='number-pad'
-                value={txtJumlahPesan}
-                onChangeText={(a) => setTxtJumlahPesan(a)}
-              />
-              <Space2 />
-              <Button icon="add-circle-outline" mode="contained" onPress={() => _onSubmit()}>
-                Pesan
+          statusOrderAll === 'Open Order' && statusOrder === 'Open Order' && statusOrderItem === '---' &&
+          <View>
+            <TextInput
+              label='Jumlah Pesan'
+              keyboardType='number-pad'
+              value={txtJumlahPesan}
+              onChangeText={(a) => setTxtJumlahPesan(a)}
+            />
+            <Space2 />
+            <Button icon="add-circle-outline" mode="contained" onPress={() => _onSubmit()}>
+              Pesan
             </Button>
-            </View>
-            : <Text>{' '}</Text>
+          </View>
         }
         {
-          // !!statusOrder && statusOrder === 'Order OK, konfirmasi ke Reseller' &&
-          !!statusOrderItem && statusOrderItem === 'Pembayaran NOK' &&
+          statusOrderItem === 'Barang dipesan' && statusOrder === 'Order OK, konfirmasi ke Reseller' &&
           <Button icon="add-circle-outline" mode="contained" onPress={() => _onOrderOK(r)}
-            // disabled={statusOrderItem === 'Pembayaran NOK' ? false : true}
           >
             Order OK, konfirmasi Pembayaran
+              </Button>
+
+        }
+        {
+          !!statusOrderItem && statusOrderItem === 'Barang di shipping' &&
+          <Button icon="add-circle-outline" mode="contained" onPress={() => _onBarangDiterima(r)}
+          >
+            Barang diterima
               </Button>
 
         }

@@ -31,6 +31,7 @@ function Page(props: IProps) {
   const [jumlah1Total, setJumlah1Total] = useState('');
   const [jumlah2Total, setJumlah2Total] = useState('');
   const [statusOrder, setStatusOrder] = useState('');
+  const [statusProduksi, setStatusProduksi] = useState('');
   const [produk, setProduk] = useState([]);
   const [statusOrderAll, setStatusOrderAll] = useState('');
   // console.log(props);
@@ -71,7 +72,31 @@ function Page(props: IProps) {
     };
   }, [produk]);
 
-  // console.log(statusOrder);
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fb.db.ref('items/admin/' + r.idItem).once('value');
+      setStatusOrder(res.val());
+      setLoading(false);
+    };
+    fetchData();
+    setLoading(false);
+    return () => {
+      fb.db.ref('items/admin').off;
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fb.db.ref('items/admin/statusProduksi').once('value');
+      setStatusProduksi(res.val());
+      setLoading(false);
+    };
+    fetchData();
+    setLoading(false);
+    return () => {
+      fb.db.ref('items/admin').off;
+    };
+  }, [loading]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,7 +111,9 @@ function Page(props: IProps) {
     };
   }, [statusOrderAll]);
 
-  const _onSubmit = (p: any, q: any, r: any, s: any) => {
+
+
+  const _onVerifikasiOrder = (p: any, q: any, r: any, s: any) => {
     if (parseInt(jumlah2Total) > parseInt(jumlah1Total)) {
       p.forEach((el: any) => {
         fb.db.ref('items/admin/' + s.idItem + '/' + el.userIdReseller)
@@ -107,6 +134,7 @@ function Page(props: IProps) {
         statusOrder: 'Konfirmasi ke Owner'
       });
     setProduk([]);
+    setLoading(true);
   }
 
 
@@ -114,6 +142,14 @@ function Page(props: IProps) {
     fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
       .update({
         statusOrderItem: 'Pembayaran OK, proses kirim Barang',
+      });
+    setProduk([]);
+  }
+
+  const _onBarangDiterima = (p: any, s: any) => {
+    fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
+      .update({
+        statusOrderItem: 'Order closed',
       });
     setProduk([]);
   }
@@ -142,19 +178,24 @@ function Page(props: IProps) {
                     ? Math.floor((parseInt(el.jumlah2Item) / parseInt(jumlah2Total)) * parseInt(jumlah1Total))
                     : el.jumlah2Item}
                 </Text>
+                <Text>Status: {el.statusOrderItem}</Text>
                 <Space5 />
                 {el.statusOrderItem === 'Pembayaran Selesai, menunggu verifikasi Admin' &&
                   <Button icon="add-circle-outline" mode="contained" onPress={() => _onVefirikasiPembayaran(el, r)}
-                  // disabled={el.statusOrderItem === 'Pembayaran Selesai, menunggu verifikasi Admin' ? false : true}
                   >
                     Verifikasi Pembayaran OK
+                  </Button>}
+                  {el.statusOrderItem === 'Barang diterima' &&
+                  <Button icon="add-circle-outline" mode="contained" onPress={() => _onBarangDiterima(el, r)}
+                  >
+                    Order closed
                   </Button>}
               </View>
             )
           }
           <Space8 />
-          {(statusOrderAll === 'Close Order' && statusOrder === 'Close Order') &&
-            <Button icon="add-circle-outline" mode="contained" onPress={() => _onSubmit(produk, jumlah1Total, jumlah2Total, r)}
+          {statusOrderAll === 'Close Order' && statusOrder === 'Open Order' && statusProduksi === 'Update stok Produksi done' && 
+            <Button icon="add-circle-outline" mode="contained" onPress={() => _onVerifikasiOrder(produk, jumlah1Total, jumlah2Total, r)}
               disabled={statusOrderAll === 'Close Order' ? false : true}
             >
               Verifikasi order
