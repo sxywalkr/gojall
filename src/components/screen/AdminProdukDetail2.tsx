@@ -34,6 +34,7 @@ function Page(props: IProps) {
   const [statusProduksi, setStatusProduksi] = useState('');
   const [produk, setProduk] = useState([]);
   const [statusOrderAll, setStatusOrderAll] = useState('');
+  const [jumlahOrder, setJumlahOrder] = useState('');
   // console.log(props);
   // const { state, dispatch } = React.useContext(AppContext);
   // const { r } = props.navigation.state.params;
@@ -74,7 +75,7 @@ function Page(props: IProps) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fb.db.ref('items/admin/' + r.idItem).once('value');
+      const res = await fb.db.ref('items/admin/' + r.idItem + '/statusOrder').once('value');
       setStatusOrder(res.val());
       setLoading(false);
     };
@@ -87,7 +88,7 @@ function Page(props: IProps) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fb.db.ref('items/admin/statusProduksi').once('value');
+      const res = await fb.db.ref('items/admin/' + r.idItem + '/statusProduksi').once('value');
       setStatusProduksi(res.val());
       setLoading(false);
     };
@@ -110,6 +111,19 @@ function Page(props: IProps) {
       fb.db.ref('items/admin').off;
     };
   }, [statusOrderAll]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fb.db.ref('items/admin/jumlahOrder').once('value');
+      setJumlahOrder(res.val());
+      setLoading(false);
+    };
+    fetchData();
+
+    return () => {
+      fb.db.ref('items/admin').off;
+    };
+  }, [loading]);
 
 
 
@@ -146,14 +160,27 @@ function Page(props: IProps) {
     setProduk([]);
   }
 
-  const _onBarangDiterima = (p: any, s: any) => {
+  const _onOrderClosed = (p: any, s: any) => {
     fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
       .update({
-        statusOrderItem: 'Order closed',
+        statusOrderItem: '---',
+      });
+    fb.db.ref('items/admin/' + s.idItem)
+      .update({
+        jumlah1Total: 0,
+        jumlah2Total: 0,
+        statusOrder: '---',
+        statusProduksi: '---',
+      });
+    fb.db.ref('items/admin')
+      .update({
+        jumlahOrder: parseInt(jumlahOrder) - 1,
       });
     setProduk([]);
+    setLoading(true);
   }
 
+  // console.log(statusOrderAll, statusOrder, statusProduksi)
 
   return (
 
@@ -169,11 +196,11 @@ function Page(props: IProps) {
               <View key={key}>
                 <Space5 />
                 <Text>
-                  {el.userNameReseller} : 
-                  {el.jumlah2Item} / 
+                  {el.userNameReseller} :
+                  {el.jumlah2Item} /
                   {jumlah2Total > jumlah1Total
                     ? 100 * parseInt(el.jumlah2Item) / parseInt(jumlah2Total)
-                    : el.jumlah2Item}% / 
+                    : el.jumlah2Item}% /
                   {jumlah2Total > jumlah1Total
                     ? Math.floor((parseInt(el.jumlah2Item) / parseInt(jumlah2Total)) * parseInt(jumlah1Total))
                     : el.jumlah2Item}
@@ -185,8 +212,8 @@ function Page(props: IProps) {
                   >
                     Verifikasi Pembayaran OK
                   </Button>}
-                  {el.statusOrderItem === 'Barang diterima' &&
-                  <Button icon="add-circle-outline" mode="contained" onPress={() => _onBarangDiterima(el, r)}
+                {el.statusOrderItem === 'Barang diterima' &&
+                  <Button icon="add-circle-outline" mode="contained" onPress={() => _onOrderClosed(el, r)}
                   >
                     Order closed
                   </Button>}
@@ -194,9 +221,8 @@ function Page(props: IProps) {
             )
           }
           <Space8 />
-          {statusOrderAll === 'Close Order' && statusOrder === 'Open Order' && statusProduksi === 'Update stok Produksi done' && 
+          {statusOrderAll === 'Close Order' && statusOrder === 'Open Order' && statusProduksi === 'Update stok Produksi done' &&
             <Button icon="add-circle-outline" mode="contained" onPress={() => _onVerifikasiOrder(produk, jumlah1Total, jumlah2Total, r)}
-              disabled={statusOrderAll === 'Close Order' ? false : true}
             >
               Verifikasi order
           </Button>}

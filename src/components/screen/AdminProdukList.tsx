@@ -116,6 +116,8 @@ function AdminProduksList(props: IProps) {
                 });
         })
         setStatusOrderAll('');
+        setProduk([]);
+        setLoading(true);
     }
 
     // console.log(produk)

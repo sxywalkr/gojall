@@ -46,7 +46,7 @@ function AdminProdukEdit(props: IProps) {
             statusProduksi: 'Update stok Produksi NOK'
         });
         fb.db.ref('items/admin/').update({
-            statusOrderAll: 'Open Order',
+            statusOrderAll: 'Open Order All',
             jumlahOrder: 0,
         });
         props.navigation.navigate('Home');

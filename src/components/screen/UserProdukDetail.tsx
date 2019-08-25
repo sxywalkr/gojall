@@ -37,6 +37,7 @@ function UserProdukDetail(props: IProps) {
   const [jumlahOrder, setJumlahOrder] = useState('0');
   const { state, dispatch } = useContext(AppContext);
   const [statusOrderAll, setStatusOrderAll] = useState('');
+  const [produks, setProduks] = useState([]);
   const r = props.selectedItem;
   // const { r } = props.navigation.state.params;
 
@@ -130,8 +131,37 @@ function UserProdukDetail(props: IProps) {
     };
   }, [loading]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const res = await fb.db.ref('items/admin/' + r.idItem).once('value');
+  //     const r1: any = [];
+  //     res.forEach((el: any) => {
+  //       // console.log(el.hasChildren());
+  //       el.hasChildren()
+  //         ? r1.push({
+  //           userIdReseller: el.val().userId,
+  //           userNameReseller: el.val().userName,
+  //           jumlah2Item: el.val().jumlah2Item,
+  //           jumlah2ItemOrder: el.val().jumlah2ItemOrder,
+  //           statusOrderItem: el.val().statusOrderItem,
+  //         })
+  //         : ''
+  //         ;
+  //     });
+  //     // console.log(res.val());
+  //     if (res.val() !== null) {
+  //       setProduks(r1);
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+
+  //   return () => {
+  //     fb.db.ref('items').off;
+  //   };
+  // }, [loading]);
+
   const _onSubmit = () => {
-    // * save to firebase 
     fb.db.ref('items/admin/' + r.idItem + '/' + state.appUser.userId)
       .update({
         userId: state.appUser.userId,
@@ -150,34 +180,33 @@ function UserProdukDetail(props: IProps) {
       });
     setLoading(true);
     setJumlah2ItemOrder('');
-    // props.navigation.navigate('AdminProdukList');
   }
 
   const _onOrderOK = (s: any) => {
-    // * save to firebase 
     fb.db.ref('items/admin/' + s.idItem + '/' + state.appUser.userId)
       .update({
-        // statusOrder: 'Order OK, konfirmasi ke Reseller',
         statusOrderItem: 'Pembayaran Selesai, menunggu verifikasi Admin'
       });
     setLoading(true);
-    // props.navigation.goBack();
   }
 
   const _onBarangDiterima = (s: any) => {
+    fb.db.ref('items/history/' + s.idItem + '/' + state.appUser.userId)
+      .update({
+        jumlah2ItemPending: parseInt(produk2) - parseInt(jumlah2ItemOrder),
+      });
     fb.db.ref('items/admin/' + s.idItem + '/' + state.appUser.userId)
       .update({
-        statusOrderItem: 'Barang diterima'
+        jumlah2Item: 0,
+        jumlah2ItemOrder: 0,
+        jumlah2ItemPending: parseInt(produk2) - parseInt(jumlah2ItemOrder),
+        statusOrderItem: 'Barang diterima',
+        nomorResi: '',
       });
-    fb.db.ref('items/admin')
-      .update({
-        jumlahOrder: parseInt(jumlahOrder) - 1,
-      });
-
     setLoading(true);
   }
 
-  // console.log(jumlahOrder);
+  // console.log(statusOrderItem);
 
   return (
     <View>{loading === true ? <ActivityIndicator animating={true} /> :
@@ -189,7 +218,7 @@ function UserProdukDetail(props: IProps) {
         <Text>Nomor Resi: {nomorResi}</Text>
         <Space5 />
         {
-          statusOrderAll === 'Open Order' && statusOrder === 'Open Order' && statusOrderItem === '---' &&
+          statusOrderAll === 'Open Order All' && statusOrder === 'Open Order' && statusOrderItem === '---' &&
           <View>
             <TextInput
               label='Jumlah Pesan'
@@ -209,7 +238,6 @@ function UserProdukDetail(props: IProps) {
           >
             Order OK, konfirmasi Pembayaran
               </Button>
-
         }
         {
           !!statusOrderItem && statusOrderItem === 'Barang di shipping' &&
