@@ -3,11 +3,14 @@ import { Platform, StatusBar, StyleSheet, View, Text, Dimensions, AsyncStorage, 
 import SwitchNavigator from './components/navigation/SwitchNavigator';
 
 import { AppProvider as Provider } from './providers';
+import { Provider as PaperProvider } from 'react-native-paper';
 
 const App = () => {
   return (
     <Provider>
-      <SwitchNavigator />
+      <PaperProvider>
+        <SwitchNavigator />
+      </PaperProvider>
     </Provider>
   );
 };

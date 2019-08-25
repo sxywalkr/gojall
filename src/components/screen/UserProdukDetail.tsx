@@ -1,20 +1,11 @@
-import React, { Component, useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
-  Platform,
-  StatusBar,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableOpacity,
-  Image,
-  ScrollView,
   View,
-  FlatList,
-  InteractionManager,
 } from 'react-native';
-import { AppProvider as Provider, AppConsumer, AppContext } from '../../providers';
+import { AppContext } from '../../providers';
 import {
-  ActivityIndicator, Text, TextInput,
-  Button,
+  ActivityIndicator, Text, TextInput, Paragraph,
+  Button, Dialog, Portal,
 } from 'react-native-paper'
 
 import styled from 'styled-components/native';
@@ -35,9 +26,10 @@ function UserProdukDetail(props: IProps) {
   const [statusOrderItem, setStatusOrderItem] = useState('');
   const [nomorResi, setNomorResi] = useState('');
   const [jumlahOrder, setJumlahOrder] = useState('0');
-  const { state, dispatch } = useContext(AppContext);
   const [statusOrderAll, setStatusOrderAll] = useState('');
-  const [produks, setProduks] = useState([]);
+  const [dlgPesan, setDlgPesan] = useState(false);
+  const { state } = useContext(AppContext);
+  const [] = useState([]);
   const r = props.selectedItem;
   // const { r } = props.navigation.state.params;
 
@@ -77,7 +69,7 @@ function UserProdukDetail(props: IProps) {
     return () => {
       fb.db.ref('items').off;
     };
-  }, [jumlah2ItemOrder]);
+  }, [loading]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,7 +86,7 @@ function UserProdukDetail(props: IProps) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fb.db.ref('items/admin/' + r.idItem + 'statusOrder').once('value');
+      const res = await fb.db.ref('items/admin/' + r.idItem + '/statusOrder').once('value');
       setStatusOrder(res.val());
       setLoading(false);
     };
@@ -131,36 +123,6 @@ function UserProdukDetail(props: IProps) {
     };
   }, [loading]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const res = await fb.db.ref('items/admin/' + r.idItem).once('value');
-  //     const r1: any = [];
-  //     res.forEach((el: any) => {
-  //       // console.log(el.hasChildren());
-  //       el.hasChildren()
-  //         ? r1.push({
-  //           userIdReseller: el.val().userId,
-  //           userNameReseller: el.val().userName,
-  //           jumlah2Item: el.val().jumlah2Item,
-  //           jumlah2ItemOrder: el.val().jumlah2ItemOrder,
-  //           statusOrderItem: el.val().statusOrderItem,
-  //         })
-  //         : ''
-  //         ;
-  //     });
-  //     // console.log(res.val());
-  //     if (res.val() !== null) {
-  //       setProduks(r1);
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-
-  //   return () => {
-  //     fb.db.ref('items').off;
-  //   };
-  // }, [loading]);
-
   const _onSubmit = () => {
     fb.db.ref('items/admin/' + r.idItem + '/' + state.appUser.userId)
       .update({
@@ -178,8 +140,9 @@ function UserProdukDetail(props: IProps) {
       .update({
         jumlahOrder: parseInt(jumlahOrder) + 1,
       });
+    // setJumlah2ItemOrder('');
+    setDlgPesan(false);
     setLoading(true);
-    setJumlah2ItemOrder('');
   }
 
   const _onOrderOK = (s: any) => {
@@ -206,7 +169,10 @@ function UserProdukDetail(props: IProps) {
     setLoading(true);
   }
 
-  // console.log(statusOrderItem);
+  const _showDialogPesan = () => setDlgPesan(true);
+  const _hideDialogPesan = () => setDlgPesan(false);
+
+  // console.log(statusOrderAll, statusOrder, statusOrderItem, r.idItem);
 
   return (
     <View>{loading === true ? <ActivityIndicator animating={true} /> :
@@ -227,7 +193,9 @@ function UserProdukDetail(props: IProps) {
               onChangeText={(a) => setTxtJumlahPesan(a)}
             />
             <Space2 />
-            <Button icon="add-circle-outline" mode="contained" onPress={() => _onSubmit()}>
+            <Button icon="add-circle-outline" mode="contained" onPress={_showDialogPesan}
+              disabled={txtJumlahPesan === '0' || txtJumlahPesan === ''}
+            >
               Pesan
             </Button>
           </View>
@@ -247,6 +215,19 @@ function UserProdukDetail(props: IProps) {
               </Button>
 
         }
+        <Portal>
+          <Dialog
+            visible={dlgPesan}
+            onDismiss={_hideDialogPesan}>
+            <Dialog.Title>Notify</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Jumlah Pesan sudah OK?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button mode="contained" onPress={_onSubmit}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </View>
     }</View>
   );

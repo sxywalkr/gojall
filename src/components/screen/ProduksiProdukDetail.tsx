@@ -1,20 +1,10 @@
-import React, { Component, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Platform,
-  StatusBar,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableOpacity,
-  Image,
-  ScrollView,
   View,
-  FlatList,
-  InteractionManager,
 } from 'react-native';
-import { AppProvider as Provider, AppConsumer, AppContext } from '../../providers';
 import {
   ActivityIndicator, Text, TextInput,
-  Button,
+  Button, Dialog, Portal, Paragraph,
 } from 'react-native-paper'
 
 import styled from 'styled-components/native';
@@ -30,10 +20,10 @@ function UserProdukDetail(props: IProps) {
   const [txtJumlahPesan, setTxtJumlahPesan] = useState('');
   const [statusProduksi, setStatusProduksi] = useState('');
   const [nomorResi, setNomorResi] = useState('');
-  const [statusOrderItem, setStatusOrderItem] = useState('');
+  const [] = useState('');
   const [produk, setProduk] = useState([]);
+  const [dlgJumlahProduksi, setDlgJumlahProduksi] = useState(false);
 
-  const { state, dispatch } = React.useContext(AppContext);
   const r = props.selectedItem;
   // console.log(r);
 
@@ -91,6 +81,7 @@ function UserProdukDetail(props: IProps) {
         jumlah1Total: parseInt(txtJumlahPesan),
         statusProduksi: 'Update stok Produksi done'
       });
+    setDlgJumlahProduksi(false);
     setLoading(true);
   }
 
@@ -102,6 +93,9 @@ function UserProdukDetail(props: IProps) {
       });
     setLoading(true);
   }
+
+  const _showDialogJumlahProduksi = () => setDlgJumlahProduksi(true);
+  const _hideDialogJumlahProduksi = () => setDlgJumlahProduksi(false);
 
   return (
     <View>{loading === true ? <ActivityIndicator animating={true} /> :
@@ -119,7 +113,9 @@ function UserProdukDetail(props: IProps) {
               onChangeText={(a) => setTxtJumlahPesan(a)}
             />
             <Space2 />
-            <Button icon="add-circle-outline" mode="contained" onPress={() => _onSubmit()}>
+            <Button icon="add-circle-outline" mode="contained" onPress={_showDialogJumlahProduksi}
+              disabled={txtJumlahPesan === '0' || txtJumlahPesan === ''}
+            >
               Simpan
         </Button>
           </View>}
@@ -146,7 +142,19 @@ function UserProdukDetail(props: IProps) {
             </View>
           )
         }
-
+        <Portal>
+          <Dialog
+            visible={dlgJumlahProduksi}
+            onDismiss={_hideDialogJumlahProduksi}>
+            <Dialog.Title>Notify</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Jumlah Barang Produksi sudah benar?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button mode="contained" onPress={_onSubmit}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </View>}
     </View>
 
@@ -158,17 +166,6 @@ UserProdukDetail.navigationOptions = {
 }
 export default UserProdukDetail;
 
-// const Container = styled.View`
-//   flex: 1;
-//   background-color: ${(props) => props.theme.background};
-//   flex-direction: row;
-//   align-items: center;
-//   justify-content: center;
-// `;
-const Space8 = styled.View`
-  height: 8px;
-  width: 8px;
-`;
 const Space5 = styled.View`
   height: 5px;
   width: 5px;

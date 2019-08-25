@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import styled from 'styled-components/native';
 import {
-    Title, Card, Button,
+    Title, Paragraph, Card, Button, Dialog, Portal,
 } from 'react-native-paper';
 import * as fb from '../../firebase/firebase';
 import AdminProdukDetail2 from '../screen/AdminProdukDetail2';
@@ -26,6 +26,7 @@ function AdminProduksList(props: IProps) {
     const [produk, setProduk] = useState([]);
     const [jumlahOrder, setJumlahOrder] = useState('');
     const [statusOrderAll, setStatusOrderAll] = useState('');
+    const [dlgCloseOrder, setDlgCloseOrder] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -97,6 +98,7 @@ function AdminProduksList(props: IProps) {
             .update({
                 statusOrderAll: 'Close Order'
             });
+        setDlgCloseOrder(false)
         setStatusOrderAll('');
     }
 
@@ -120,6 +122,9 @@ function AdminProduksList(props: IProps) {
         setLoading(true);
     }
 
+    const _showDialogCloseOrder = () => setDlgCloseOrder(true);
+    const _hideDialogCloseOrder = () => setDlgCloseOrder(false);
+
     // console.log(produk)
 
     return (
@@ -134,7 +139,7 @@ function AdminProduksList(props: IProps) {
             <View style={{ width: '100%' }}>
                 {!!state.appUser && state.appUser.userRole === 'Admin' && statusOrderAll === 'Open Order All' && parseInt(jumlahOrder) !== 0 &&
                     <Button icon="add-circle-outline" mode="contained"
-                        onPress={() => _onCloseOrder()}
+                        onPress={_showDialogCloseOrder}
                     >
                         Close Order
                 </Button>}
@@ -145,7 +150,19 @@ function AdminProduksList(props: IProps) {
                         Open Order
                 </Button>}
             </View>
-
+            <Portal>
+                <Dialog
+                    visible={dlgCloseOrder}
+                    onDismiss={_hideDialogCloseOrder}>
+                    <Dialog.Title>Notify</Dialog.Title>
+                    <Dialog.Content>
+                        <Paragraph>Close Order?</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button mode="contained" onPress={_onCloseOrder}>OK</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </Container>
     );
 
