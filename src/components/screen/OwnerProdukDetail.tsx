@@ -1,20 +1,10 @@
-import React, { Component, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Platform,
-  StatusBar,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableOpacity,
-  Image,
-  ScrollView,
   View,
-  FlatList,
-  InteractionManager,
 } from 'react-native';
-import { AppProvider as Provider, AppConsumer, AppContext } from '../../providers';
 import {
-  ActivityIndicator, Text, TextInput, Divider,
-  Button,
+  ActivityIndicator, Text, Divider,
+  Button, Dialog, Portal, Paragraph,
 } from 'react-native-paper'
 
 import styled from 'styled-components/native';
@@ -27,13 +17,12 @@ interface IProps {
 
 function OwnerProdukDetail(props: IProps) {
   const [loading, setLoading] = useState(true);
-  const [txtJumlahPesan, setTxtJumlahPesan] = useState('');
+  const [] = useState('');
   const [jumlah1Total, setJumlah1Total] = useState('');
   const [jumlah2Total, setJumlah2Total] = useState('');
   const [statusOrder, setStatusOrder] = useState('');
   const [produk, setProduk] = useState([]);
-
-  const { state, dispatch } = React.useContext(AppContext);
+  const [dlgVerifikasiOrder, setDlgVerifikasiOrder] = useState(false);
 
   const r = props.selectedItem;
 
@@ -72,8 +61,12 @@ function OwnerProdukDetail(props: IProps) {
       .update({
         statusOrder: 'Order OK, konfirmasi ke Reseller'
       });
+    setDlgVerifikasiOrder(false)
     setLoading(true);
   }
+
+  const _showDialogVerifikasiOrder = () => setDlgVerifikasiOrder(true);
+  const _hideDialogVerifikasiOrder = () => setDlgVerifikasiOrder(false);
 
   return (
     <View>{loading === true ? <ActivityIndicator animating={true} /> :
@@ -100,13 +93,25 @@ function OwnerProdukDetail(props: IProps) {
             </View>
           )
         }
-
         {statusOrder === 'Konfirmasi ke Owner' &&
-          <Button icon="add-circle-outline" mode="contained" onPress={() => _onKonfirmasiKeReseller(r)}
+          <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiOrder}
             disabled={statusOrder === 'Konfirmasi ke Owner' ? false : true}
           >
             Verifikasi Order
       </Button>}
+        <Portal>
+          <Dialog
+            visible={dlgVerifikasiOrder}
+            onDismiss={_hideDialogVerifikasiOrder}>
+            <Dialog.Title>Notify</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Verifikasi Order sudah OK?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button mode="contained" onPress={() => _onKonfirmasiKeReseller(r)}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </View>
     }</View>
   );

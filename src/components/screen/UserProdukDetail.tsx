@@ -28,6 +28,8 @@ function UserProdukDetail(props: IProps) {
   const [jumlahOrder, setJumlahOrder] = useState('0');
   const [statusOrderAll, setStatusOrderAll] = useState('');
   const [dlgPesan, setDlgPesan] = useState(false);
+  const [dlgKonfirmasiPembayaran, setDlgKonfirmasiPembayaran] = useState(false);
+  const [dlgBarangDiterima, setDlgBarangDiterima] = useState(false);
   const { state } = useContext(AppContext);
   const [] = useState([]);
   const r = props.selectedItem;
@@ -150,6 +152,7 @@ function UserProdukDetail(props: IProps) {
       .update({
         statusOrderItem: 'Pembayaran Selesai, menunggu verifikasi Admin'
       });
+    setDlgKonfirmasiPembayaran(false);
     setLoading(true);
   }
 
@@ -166,11 +169,16 @@ function UserProdukDetail(props: IProps) {
         statusOrderItem: 'Barang diterima',
         nomorResi: '',
       });
+    setDlgBarangDiterima(false);
     setLoading(true);
   }
 
   const _showDialogPesan = () => setDlgPesan(true);
   const _hideDialogPesan = () => setDlgPesan(false);
+  const _showDialogKonfirmasiPembayaran = () => setDlgKonfirmasiPembayaran(true);
+  const _hideDialogKonfirmasiPembayaran = () => setDlgKonfirmasiPembayaran(false);
+  const _showDialogBarangDiterima = () => setDlgBarangDiterima(true);
+  const _hideDialogBarangDiterima = () => setDlgBarangDiterima(false);
 
   // console.log(statusOrderAll, statusOrder, statusOrderItem, r.idItem);
 
@@ -202,17 +210,17 @@ function UserProdukDetail(props: IProps) {
         }
         {
           statusOrderItem === 'Barang dipesan' && statusOrder === 'Order OK, konfirmasi ke Reseller' &&
-          <Button icon="add-circle-outline" mode="contained" onPress={() => _onOrderOK(r)}
+          <Button icon="add-circle-outline" mode="contained" onPress={_showDialogKonfirmasiPembayaran}
           >
             Order OK, konfirmasi Pembayaran
               </Button>
         }
         {
           !!statusOrderItem && statusOrderItem === 'Barang di shipping' &&
-          <Button icon="add-circle-outline" mode="contained" onPress={() => _onBarangDiterima(r)}
+          <Button icon="add-circle-outline" mode="contained" onPress={_showDialogBarangDiterima}
           >
             Barang diterima
-              </Button>
+          </Button>
 
         }
         <Portal>
@@ -225,6 +233,32 @@ function UserProdukDetail(props: IProps) {
             </Dialog.Content>
             <Dialog.Actions>
               <Button mode="contained" onPress={_onSubmit}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
+        <Portal>
+          <Dialog
+            visible={dlgKonfirmasiPembayaran}
+            onDismiss={_hideDialogKonfirmasiPembayaran}>
+            <Dialog.Title>Notify</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Pembayaran sudah di transfer?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button mode="contained" onPress={() => _onOrderOK(r)}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
+        <Portal>
+          <Dialog
+            visible={dlgBarangDiterima}
+            onDismiss={_hideDialogBarangDiterima}>
+            <Dialog.Title>Notify</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Barang {r.namaItem} sudah di terima?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button mode="contained" onPress={() => _onBarangDiterima(r)}>OK</Button>
             </Dialog.Actions>
           </Dialog>
         </Portal>

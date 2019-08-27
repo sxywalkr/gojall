@@ -27,6 +27,7 @@ function AdminProduksList(props: IProps) {
     const [jumlahOrder, setJumlahOrder] = useState('');
     const [statusOrderAll, setStatusOrderAll] = useState('');
     const [dlgCloseOrder, setDlgCloseOrder] = useState(false);
+    const [dlgOpenOrder, setDlgOpenOrder] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -117,6 +118,7 @@ function AdminProduksList(props: IProps) {
                     statusProduksi: 'Update stok Produksi NOK'
                 });
         })
+        setDlgOpenOrder(false);
         setStatusOrderAll('');
         setProduk([]);
         setLoading(true);
@@ -124,6 +126,8 @@ function AdminProduksList(props: IProps) {
 
     const _showDialogCloseOrder = () => setDlgCloseOrder(true);
     const _hideDialogCloseOrder = () => setDlgCloseOrder(false);
+    const _showDialogOpenOrder = () => setDlgOpenOrder(true);
+    const _hideDialogOpenOrder = () => setDlgOpenOrder(false);
 
     // console.log(produk)
 
@@ -145,7 +149,7 @@ function AdminProduksList(props: IProps) {
                 </Button>}
                 {!!state.appUser && state.appUser.userRole === 'Admin' && statusOrderAll === 'Close Order' && parseInt(jumlahOrder) === 0 &&
                     <Button icon="add-circle-outline" mode="contained"
-                        onPress={() => _onOpenOrderAll()}
+                        onPress={_showDialogOpenOrder}
                     >
                         Open Order
                 </Button>}
@@ -160,6 +164,19 @@ function AdminProduksList(props: IProps) {
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button mode="contained" onPress={_onCloseOrder}>OK</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
+            <Portal>
+                <Dialog
+                    visible={dlgOpenOrder}
+                    onDismiss={_hideDialogOpenOrder}>
+                    <Dialog.Title>Notify</Dialog.Title>
+                    <Dialog.Content>
+                        <Paragraph>Open Order?</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button mode="contained" onPress={() => _onOpenOrderAll()}>OK</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>

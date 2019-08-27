@@ -23,6 +23,7 @@ function UserProdukDetail(props: IProps) {
   const [] = useState('');
   const [produk, setProduk] = useState([]);
   const [dlgJumlahProduksi, setDlgJumlahProduksi] = useState(false);
+  const [dlgKirimBarang, setDlgKirimBarang] = useState(false);
 
   const r = props.selectedItem;
   // console.log(r);
@@ -91,18 +92,20 @@ function UserProdukDetail(props: IProps) {
         statusOrderItem: 'Barang di shipping',
         nomorResi: nomorResi,
       });
+    setDlgKirimBarang(false);
     setLoading(true);
   }
 
   const _showDialogJumlahProduksi = () => setDlgJumlahProduksi(true);
   const _hideDialogJumlahProduksi = () => setDlgJumlahProduksi(false);
+  const _showDialogKirimBarang = () => setDlgKirimBarang(true);
+  const _hideDialogKirimBarang = () => setDlgKirimBarang(false);
 
   return (
     <View>{loading === true ? <ActivityIndicator animating={true} /> :
       <View>
         <Text>Harga Item: {r.harga2Item}</Text>
         <Text>Produksi Total: {txtJumlahPesan}</Text>
-        {/* <Text>Status Proses Kirim Barang: {statusProduksi}</Text> */}
         <Space5 />
         {!!statusProduksi && statusProduksi === 'Update stok Produksi NOK' &&
           <View>
@@ -135,10 +138,25 @@ function UserProdukDetail(props: IProps) {
                     onChangeText={(a) => setNomorResi(a)}
                   />
                   <Space2 />
-                  <Button icon="add-circle-outline" mode="contained" onPress={() => _onKirimBarang(el, r)}>
+                  <Button icon="add-circle-outline" mode="contained" onPress={_showDialogKirimBarang}
+                    disabled={nomorResi === ''}
+                  >
                     Kirim Barang
                   </Button>
                 </View>}
+              <Portal>
+                <Dialog
+                  visible={dlgKirimBarang}
+                  onDismiss={_hideDialogKirimBarang}>
+                  <Dialog.Title>Notify</Dialog.Title>
+                  <Dialog.Content>
+                    <Paragraph>Barang {el.userNameReseller} sudah dikirim?</Paragraph>
+                  </Dialog.Content>
+                  <Dialog.Actions>
+                    <Button mode="contained" onPress={() => _onKirimBarang(el, r)}>OK</Button>
+                  </Dialog.Actions>
+                </Dialog>
+              </Portal>
             </View>
           )
         }

@@ -1,25 +1,14 @@
-import React, { Component, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Platform,
-  StatusBar,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableOpacity,
-  Image,
-  ScrollView,
   View,
-  FlatList,
-  InteractionManager,
 } from 'react-native';
-import { AppProvider as Provider, AppConsumer, AppContext } from '../../providers';
 import {
-  ActivityIndicator, Text, TextInput, Divider,
-  Button,
+  ActivityIndicator, Text, Divider,
+  Button, Dialog, Portal, Paragraph,
 } from 'react-native-paper'
 
 import styled from 'styled-components/native';
 import * as fb from '../../firebase/firebase';
-
 
 interface IProps {
   navigation: any;
@@ -35,9 +24,10 @@ function Page(props: IProps) {
   const [produk, setProduk] = useState([]);
   const [statusOrderAll, setStatusOrderAll] = useState('');
   const [jumlahOrder, setJumlahOrder] = useState('');
-  // console.log(props);
-  // const { state, dispatch } = React.useContext(AppContext);
-  // const { r } = props.navigation.state.params;
+  const [dlgVerifikasiOrder, setDlgVerifikasiOrder] = useState(false);
+  const [dlgVerifikasiPembayaran, setDlgVerifikasiPembayaran] = useState(false);
+  const [dlgOrderClosed, setDlgOrderClosed] = useState(false);
+
   const r = props.selectedItem;
 
   useEffect(() => {
@@ -148,6 +138,7 @@ function Page(props: IProps) {
         statusOrder: 'Konfirmasi ke Owner'
       });
     setProduk([]);
+    setDlgVerifikasiOrder(false);
     setLoading(true);
   }
 
@@ -157,6 +148,7 @@ function Page(props: IProps) {
       .update({
         statusOrderItem: 'Pembayaran OK, proses kirim Barang',
       });
+    setDlgVerifikasiPembayaran(false);
     setProduk([]);
   }
 
@@ -176,9 +168,17 @@ function Page(props: IProps) {
       .update({
         jumlahOrder: parseInt(jumlahOrder) - 1,
       });
+    setDlgOrderClosed(false);
     setProduk([]);
     setLoading(true);
   }
+
+  const _showDialogVerifikasiOrder = () => setDlgVerifikasiOrder(true);
+  const _hideDialogVerifikasiOrder = () => setDlgVerifikasiOrder(false);
+  const _showDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(true);
+  const _hideDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(false);
+  const _showDialogOrderClosed = () => setDlgOrderClosed(true);
+  const _hideDialogOrderClosed = () => setDlgOrderClosed(false);
 
   // console.log(statusOrderAll, statusOrder, statusProduksi)
 
@@ -208,24 +208,63 @@ function Page(props: IProps) {
                 <Text>Status: {el.statusOrderItem}</Text>
                 <Space5 />
                 {el.statusOrderItem === 'Pembayaran Selesai, menunggu verifikasi Admin' &&
-                  <Button icon="add-circle-outline" mode="contained" onPress={() => _onVefirikasiPembayaran(el, r)}
+                  <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiPembayaran}
                   >
                     Verifikasi Pembayaran OK
                   </Button>}
                 {el.statusOrderItem === 'Barang diterima' &&
-                  <Button icon="add-circle-outline" mode="contained" onPress={() => _onOrderClosed(el, r)}
+                  <Button icon="add-circle-outline" mode="contained" onPress={_showDialogOrderClosed}
                   >
                     Order closed
                   </Button>}
+                <Portal>
+                  <Dialog
+                    visible={dlgVerifikasiPembayaran}
+                    onDismiss={_hideDialogVerifikasiPembayaran}>
+                    <Dialog.Title>Notify</Dialog.Title>
+                    <Dialog.Content>
+                      <Paragraph>Verifikasi Pembayaran {el.userNameReseller} sudah OK?</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                      <Button mode="contained" onPress={() => _onVefirikasiPembayaran(el, r)}>OK</Button>
+                    </Dialog.Actions>
+                  </Dialog>
+                </Portal>
+                <Portal>
+                  <Dialog
+                    visible={dlgOrderClosed}
+                    onDismiss={_hideDialogOrderClosed}>
+                    <Dialog.Title>Notify</Dialog.Title>
+                    <Dialog.Content>
+                      <Paragraph>Order {el.userNameReseller} closed?</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                      <Button mode="contained" onPress={() => _onOrderClosed(el, r)}>OK</Button>
+                    </Dialog.Actions>
+                  </Dialog>
+                </Portal>
               </View>
             )
           }
           <Space8 />
           {statusOrderAll === 'Close Order' && statusOrder === 'Open Order' && statusProduksi === 'Update stok Produksi done' &&
-            <Button icon="add-circle-outline" mode="contained" onPress={() => _onVerifikasiOrder(produk, jumlah1Total, jumlah2Total, r)}
+            <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiOrder}
             >
               Verifikasi order
           </Button>}
+          <Portal>
+            <Dialog
+              visible={dlgVerifikasiOrder}
+              onDismiss={_hideDialogVerifikasiOrder}>
+              <Dialog.Title>Notify</Dialog.Title>
+              <Dialog.Content>
+                <Paragraph>Verifikasi Order sudah OK?</Paragraph>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button mode="contained" onPress={() => _onVerifikasiOrder(produk, jumlah1Total, jumlah2Total, r)}>OK</Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
         </View>
       }
     </View>
@@ -239,13 +278,8 @@ Page.navigationOptions = {
 
 export default Page;
 
-const Container = styled.View`
-  flex: 1;
-  background-color: ${(props) => props.theme.background};
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-`;
+
+
 const Space8 = styled.View`
   height: 8px;
   width: 8px;
@@ -254,7 +288,4 @@ const Space5 = styled.View`
   height: 5px;
   width: 5px;
 `;
-const Space2 = styled.View`
-  height: 2px;
-  width: 2px;
-`;
+
