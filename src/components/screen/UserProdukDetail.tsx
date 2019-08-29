@@ -165,6 +165,7 @@ function UserProdukDetail(props: IProps) {
       .update({
         jumlah2Item: 0,
         jumlah2ItemOrder: 0,
+        jumlah2ItemPercentage: 0,
         jumlah2ItemPending: parseInt(produk2) - parseInt(jumlah2ItemOrder),
         statusOrderItem: 'Barang diterima',
         nomorResi: '',
@@ -209,7 +210,7 @@ function UserProdukDetail(props: IProps) {
           </View>
         }
         {
-          statusOrderItem === 'Barang dipesan' && statusOrder === 'Order OK, konfirmasi ke Reseller' &&
+          statusOrderItem === 'Order OK, konfirmasi ke Reseller' &&
           <Button icon="add-circle-outline" mode="contained" onPress={_showDialogKonfirmasiPembayaran}
           >
             Order OK, konfirmasi Pembayaran

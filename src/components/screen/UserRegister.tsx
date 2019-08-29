@@ -46,6 +46,7 @@ function UserRegister(props: IProps) {
           label='Email'
           value={txtEmail}
           onChangeText={(a) => setTxtEmail(a)}
+          returnKeyType='next'
         />
         <Space8 />
         <TextInput
@@ -53,6 +54,7 @@ function UserRegister(props: IProps) {
           value={txtPassword}
           onChangeText={(a) => setTxtPassword(a)}
           secureTextEntry={true}
+          returnKeyType='next'
         />
         <Space8 />
         <Button mode="contained" onPress={() => _onRegister(txtEmail, txtPassword)}>

@@ -3,8 +3,8 @@ import {
   View,
 } from 'react-native';
 import {
-  ActivityIndicator, Text, Divider,
-  Button, Dialog, Portal, Paragraph,
+  ActivityIndicator, Text, Divider, TextInput,
+  Button, Dialog, Portal, Paragraph, IconButton,
 } from 'react-native-paper'
 
 import styled from 'styled-components/native';
@@ -27,6 +27,9 @@ function Page(props: IProps) {
   const [dlgVerifikasiOrder, setDlgVerifikasiOrder] = useState(false);
   const [dlgVerifikasiPembayaran, setDlgVerifikasiPembayaran] = useState(false);
   const [dlgOrderClosed, setDlgOrderClosed] = useState(false);
+  const [txtJumlahPesan, setTxtJumlahPesan] = useState('');
+  const [dlgPesan, setDlgPesan] = useState(false);
+  const [editPesan, setEditPesan] = useState(false);
 
   const r = props.selectedItem;
 
@@ -42,6 +45,7 @@ function Page(props: IProps) {
             userNameReseller: el.val().userName,
             jumlah2Item: el.val().jumlah2Item,
             jumlah2ItemOrder: el.val().jumlah2ItemOrder,
+            jumlah2ItemPercentage: el.val().jumlah2ItemPercentage,
             statusOrderItem: el.val().statusOrderItem,
           })
           : ''
@@ -57,7 +61,6 @@ function Page(props: IProps) {
       }
     };
     fetchData();
-
     return () => {
       fb.db.ref('items').off;
     };
@@ -122,14 +125,18 @@ function Page(props: IProps) {
       p.forEach((el: any) => {
         fb.db.ref('items/admin/' + s.idItem + '/' + el.userIdReseller)
           .update({
+            jumlah2ItemPercentage: Math.floor(parseInt(el.jumlah2Item) / parseInt(jumlah2Total)) * 100,
             jumlah2ItemOrder: Math.floor((parseInt(el.jumlah2Item) / parseInt(jumlah2Total)) * parseInt(jumlah1Total)),
+            statusOrderItem: 'Jumlah pesanan di simpan',
           })
       });
     } else {
       p.forEach((el: any) => {
         fb.db.ref('items/admin/' + s.idItem + '/' + el.userIdReseller)
           .update({
+            jumlah2ItemPercentage: parseInt(el.jumlah2Item),
             jumlah2ItemOrder: parseInt(el.jumlah2Item),
+            statusOrderItem: 'Jumlah pesanan di simpan',
           })
       });
     }
@@ -173,14 +180,33 @@ function Page(props: IProps) {
     setLoading(true);
   }
 
+  const _onEditPesanOK = (p: any, q: any, r: any) => {
+    console.log(p, q, r)
+    fb.db.ref('items/admin/' + q.idItem + '/' + p.userIdReseller)
+      .update({
+        jumlah2ItemOrder: parseInt(txtJumlahPesan),
+        statusOrderItem: 'Jumlah pesan di konfirm Admin'
+      });
+    fb.db.ref('items/admin/' + q.idItem)
+      .update({
+        jumlah2Total: parseInt(r) - parseInt(p.jumlah2Item) + parseInt(txtJumlahPesan),
+      });
+    setEditPesan(false);
+    setDlgPesan(false);
+    setProduk([]);
+    setLoading(true);
+  }
+
   const _showDialogVerifikasiOrder = () => setDlgVerifikasiOrder(true);
   const _hideDialogVerifikasiOrder = () => setDlgVerifikasiOrder(false);
   const _showDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(true);
   const _hideDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(false);
   const _showDialogOrderClosed = () => setDlgOrderClosed(true);
   const _hideDialogOrderClosed = () => setDlgOrderClosed(false);
+  const _showDialogPesan = () => setDlgPesan(true);
+  const _hideDialogPesan = () => setDlgPesan(false);
 
-  // console.log(statusOrderAll, statusOrder, statusProduksi)
+  console.log(editPesan, produk)
 
   return (
 
@@ -193,20 +219,46 @@ function Page(props: IProps) {
           <Divider />
           {
             !!produk && produk.map((el: any, key) =>
-              <View key={key}>
+              <View key={key} style={el.statusOrderItem === 'Jumlah pesanan di simpan' && !editPesan ? { flexDirection: 'row', alignItems: 'center' } : { flexDirection: 'column' } }>
                 <Space5 />
-                <Text>
-                  {el.userNameReseller} :
-                  {el.jumlah2Item} /
-                  {jumlah2Total > jumlah1Total
-                    ? 100 * parseInt(el.jumlah2Item) / parseInt(jumlah2Total)
-                    : el.jumlah2Item}% /
-                  {jumlah2Total > jumlah1Total
-                    ? Math.floor((parseInt(el.jumlah2Item) / parseInt(jumlah2Total)) * parseInt(jumlah1Total))
-                    : el.jumlah2Item}
-                </Text>
-                <Text>Status: {el.statusOrderItem}</Text>
+                <View>
+                  <Text>
+                    {el.userNameReseller} :
+                    {el.jumlah2Item} /
+                    {' '}{el.jumlah2ItemPercentage}% /
+                    {' '}{el.jumlah2ItemOrder}
+                  </Text>
+                  <Text>Status: {el.statusOrderItem}</Text>
+                </View>
                 <Space5 />
+                {
+                  (el.statusOrderItem === 'Jumlah pesanan di simpan' && !editPesan) &&
+                  <View><IconButton icon="edit"
+                    size={20}
+                    onPress={() => setEditPesan(true)}
+                  /></View>
+                }
+                {
+                  editPesan &&
+                  <View>
+                    <TextInput
+                      label='Jumlah Pesan'
+                      keyboardType='number-pad'
+                      value={txtJumlahPesan}
+                      onChangeText={(a) => setTxtJumlahPesan(a)}
+                    />
+                    <Space2 />
+                    <Button onPress={() => setEditPesan(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button icon="add-circle-outline" mode="contained" onPress={_showDialogPesan}
+                      disabled={txtJumlahPesan === '0' || txtJumlahPesan === ''}
+                    >
+                      Pesan OK
+                    </Button>
+                  </View>
+                }
                 {el.statusOrderItem === 'Pembayaran Selesai, menunggu verifikasi Admin' &&
                   <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiPembayaran}
                   >
@@ -217,6 +269,19 @@ function Page(props: IProps) {
                   >
                     Order closed
                   </Button>}
+                <Portal>
+                  <Dialog
+                    visible={dlgPesan}
+                    onDismiss={_hideDialogPesan}>
+                    <Dialog.Title>Notify</Dialog.Title>
+                    <Dialog.Content>
+                      <Paragraph>Jumlah Pesan sudah OK?</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                      <Button mode="contained" onPress={() => _onEditPesanOK(el, r, jumlah2Total)}>OK</Button>
+                    </Dialog.Actions>
+                  </Dialog>
+                </Portal>
                 <Portal>
                   <Dialog
                     visible={dlgVerifikasiPembayaran}
@@ -250,7 +315,7 @@ function Page(props: IProps) {
           {statusOrderAll === 'Close Order' && statusOrder === 'Open Order' && statusProduksi === 'Update stok Produksi done' &&
             <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiOrder}
             >
-              Verifikasi order
+              Set Initial order
           </Button>}
           <Portal>
             <Dialog
@@ -258,7 +323,7 @@ function Page(props: IProps) {
               onDismiss={_hideDialogVerifikasiOrder}>
               <Dialog.Title>Notify</Dialog.Title>
               <Dialog.Content>
-                <Paragraph>Verifikasi Order sudah OK?</Paragraph>
+                <Paragraph>Set Initial Order?</Paragraph>
               </Dialog.Content>
               <Dialog.Actions>
                 <Button mode="contained" onPress={() => _onVerifikasiOrder(produk, jumlah1Total, jumlah2Total, r)}>OK</Button>
@@ -287,5 +352,9 @@ const Space8 = styled.View`
 const Space5 = styled.View`
   height: 5px;
   width: 5px;
+`;
+const Space2 = styled.View`
+  height: 2px;
+  width: 2px;
 `;
 

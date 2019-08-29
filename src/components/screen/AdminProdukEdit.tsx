@@ -61,12 +61,14 @@ function AdminProdukEdit(props: IProps) {
                     label='Nama Item'
                     value={txtNamaItem}
                     onChangeText={(a) => setTxtNamaItem(a)}
+                    returnKeyType='next'
                 />
                 <Space8 />
                 <TextInput
                     label='Kategori Item'
                     value={txtKategoriItem}
                     onChangeText={(a) => setTxtKategoriItem(a)}
+                    returnKeyType='next'
                 />
                 <Space8 />
                 <TextInput
@@ -74,6 +76,7 @@ function AdminProdukEdit(props: IProps) {
                     value={txtHarga1Item}
                     keyboardType='number-pad'
                     onChangeText={(a) => setTxtHarga1Item(a)}
+                    returnKeyType='next'
                 />
                 <Space8 />
                 <TextInput
@@ -81,6 +84,7 @@ function AdminProdukEdit(props: IProps) {
                     value={txtHarga2Item}
                     keyboardType='number-pad'
                     onChangeText={(a) => setTxtHarga2Item(a)}
+                    returnKeyType='next'
                 />
                 <Space8 />
                 {/* <TextInput

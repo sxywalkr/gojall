@@ -39,6 +39,7 @@ function Login(props: IProps) {
           value={txtEmail}
           keyboardType='email-address'
           onChangeText={(a) => setTxtEmail(a)}
+          returnKeyType='next'
         />
         <Space8 />
         <TextInput
@@ -46,6 +47,7 @@ function Login(props: IProps) {
           value={txtPassword}
           onChangeText={(a) => setTxtPassword(a)}
           secureTextEntry={true}
+          returnKeyType='next'
         />
         <Space8 />
         <Button mode="contained" onPress={() => _onLogin(txtEmail, txtPassword)}>
