@@ -93,7 +93,6 @@ function UserProdukDetail(props: IProps) {
       setLoading(false);
     };
     fetchData();
-    setLoading(false);
     return () => {
       fb.db.ref('items/admin').off;
     };

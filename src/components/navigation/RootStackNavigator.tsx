@@ -15,6 +15,7 @@ import UserProdukDetail from '../screen/UserProdukDetail';
 import ProduksiProdukDetail from '../screen/ProduksiProdukDetail';
 import AdminUserList from '../screen/AdminUserList';
 import OwnerProdukDetail from '../screen/OwnerProdukDetail';
+import UserProfileEdit from '../screen/UserProfileEdit';
 
 const BottomTabNavigator = createBottomTabNavigator(
   {
@@ -88,6 +89,9 @@ const routeConfig = {
   },
   OwnerProdukDetail: {
     screen: OwnerProdukDetail,
+  },
+  UserProfileEdit: {
+    screen: UserProfileEdit,
   },
   Intro: {
     screen: IntroScreen,

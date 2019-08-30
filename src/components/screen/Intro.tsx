@@ -87,15 +87,15 @@ function Intro(props: IProps) {
   return (
     <Container>
       <ContentWrapper>
-        <AppUserProfile />
-        <StyledText
+        <AppUserProfile navigation={props.navigation} />
+        {/* <StyledText
           style={{
             marginTop: 100,
           }}
         >{state.user.displayName}</StyledText>
         <StyledText>{state.user.age ? state.user.age : ''}</StyledText>
         <StyledText>{state.user.job}</StyledText>
-        <StyledText>{state.inputs}</StyledText>
+        <StyledText>{state.inputs}</StyledText> */}
       </ContentWrapper>
       <ButtonWrapper>
         {/* <Button
@@ -137,7 +137,13 @@ function Intro(props: IProps) {
   );
 }
 
+Intro.navigationOptions = {
+  title: 'User Profile',
+}
+
 export default Intro;
+
+
 
 const Container = styled.View`
   flex: 1;
@@ -156,7 +162,7 @@ const ContentWrapper = styled.View`
   height: 100%;
   width: 100%;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
 `;
 
 const ButtonWrapper = styled.View`

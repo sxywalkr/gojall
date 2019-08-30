@@ -8,8 +8,8 @@ import {
     TextInput,
     Button,
 } from 'react-native-paper';
-import { AppProvider as Provider, AppConsumer, AppContext } from '../../providers';
-import { IProduk } from 'src/types';
+// import { AppContext } from '../../providers';
+import { IProduk } from '../../../src/types';
 import * as fb from '../../firebase/firebase';
 
 interface IProps {
@@ -22,9 +22,8 @@ function AdminProdukEdit(props: IProps) {
     const [txtKategoriItem, setTxtKategoriItem] = React.useState('');
     const [txtHarga1Item, setTxtHarga1Item] = React.useState('');
     const [txtHarga2Item, setTxtHarga2Item] = React.useState('');
-    const [txtJumlah1Item, setTxtJumlah1Item] = React.useState('');
-    const [txtJumlah2Item, setTxtJumlah2Item] = React.useState('');
-    const { state, dispatch } = React.useContext(AppContext);
+    const [] = React.useState('');
+    const [] = React.useState('');
 
     const _onSubmit = () => {
         // * get key to firebase 
