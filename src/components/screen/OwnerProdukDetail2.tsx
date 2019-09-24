@@ -10,11 +10,10 @@ import {
 import styled from 'styled-components/native';
 import * as fb from '../../firebase/firebase';
 
-import OwnerProdukDetail2 from '../screen/OwnerProdukDetail2';
-
 interface IProps {
-  navigation: any;
-  selectedItem: any;
+  navigation?: any;
+  selectedItem?: any;
+  selectedUser?: any;
 }
 
 function OwnerProdukDetail(props: IProps) {
@@ -30,14 +29,20 @@ function OwnerProdukDetail(props: IProps) {
   const [editPesan, setEditPesan] = useState(false);
 
   const r = props.selectedItem;
+  const s = props.selectedUser;
+
+  // console.log('jumlah2Total', jumlah2Total)
 
   useEffect(() => {
+    // console.log('r', r)
+    // console.log('s', s)
     const fetchData = async () => {
-      const res = await fb.db.ref('items/admin/' + r.idItem).once('value');
+      const res = await fb.db.ref('items/admin/' + s.idItem).once('value');
       const r1: any = [];
       res.forEach((el: any) => {
-        el.hasChildren()
-          ? r1.push({
+        // console.log(el.val())
+        el.val().userId !== undefined ?
+          r1.push({
             userIdReseller: el.val().userId,
             userNameReseller: el.val().userName,
             jumlah2Item: el.val().jumlah2Item,
@@ -48,34 +53,24 @@ function OwnerProdukDetail(props: IProps) {
           : ''
           ;
       });
-      setProduk(r1);
-      setJumlah1Total(res.val().jumlah1Total);
-      setJumlah2Total(res.val().jumlah2Total);
-      setStatusOrder(res.val().statusOrder);
+      if (res.val() !== null) {
+        setProduk(r1);
+        setJumlah1Total(res.val().jumlah1Total);
+        setJumlah2Total(res.val().jumlah2Total);
+        setStatusOrder(res.val().statusOrder);
+        setLoading(false);
+        // console.log('jumlah2Total', jumlah2Total)
+      }
     };
     fetchData();
-    setLoading(false);
+
     return () => {
       fb.db.ref('items').off;
     };
   }, [produk]);
 
-  const _onKonfirmasiKeReseller = (s: any, t: any) => {
-    // * save to firebase 
-    fb.db.ref('items/admin/' + s.idItem)
-      .update({
-        statusOrder: 'Order OK, konfirmasi ke Reseller',
-      });
-    fb.db.ref('items/admin/' + s.idItem + '/' + t.userIdReseller)
-      .update({
-        statusOrderItem: 'Order OK, konfirmasi ke Reseller',
-      });
-    setDlgVerifikasiOrder(false)
-    setLoading(true);
-  }
-
   const _onEditPesanOK = (p: any, q: any, r: any) => {
-    // console.log(p, q, r)
+    // console.log('jumlah2Total', jumlah2Total, r, p.jumlah2Item, txtJumlahPesan)
     fb.db.ref('items/admin/' + q.idItem + '/' + p.userIdReseller)
       .update({
         jumlah2ItemOrder: parseInt(txtJumlahPesan),
@@ -83,11 +78,12 @@ function OwnerProdukDetail(props: IProps) {
       });
     fb.db.ref('items/admin/' + q.idItem)
       .update({
-        jumlah2Total: parseInt(r) - parseInt(p.jumlah2Item) + parseInt(txtJumlahPesan),
+        jumlah2Total: parseInt(r) - parseInt(p.jumlah2ItemOrder) + parseInt(txtJumlahPesan),
         statusOrder: 'Order OK, konfirmasi ke Reseller',
       });
     setEditPesan(false);
     setDlgPesan(false);
+    setTxtJumlahPesan('');
     setProduk([]);
     setLoading(true);
   }
@@ -101,44 +97,63 @@ function OwnerProdukDetail(props: IProps) {
 
   return (
     <View>{loading === true ? <ActivityIndicator animating={true} /> :
-      <View>
-        <Text>Harga Item: {r.harga2Item}</Text>
-        <Text>{jumlah1Total} / {jumlah2Total}</Text>
-        <Space8 />
-        <Divider />
+
+      <View style={(r.statusOrderItem === 'Jumlah pesan di konfirm Admin' || r.statusOrderItem === 'Jumlah pesanan di simpan') && editPesan ? { flexDirection: 'column' } : { flexDirection: 'row', alignItems: 'center' }}>
+        <Space5 />
+        <View>
+          <Text>
+            {r.userNameReseller} :
+            {r.jumlah2Item} /{' '}
+            {r.jumlah2ItemPercentage}% /{' '}
+            {r.jumlah2ItemOrder}
+          </Text>
+        </View>
+        <Space5 />
         {
-          !!produk && produk.map((el: any, key) =>
-            <View key={key} >
-              <Space5 />
-              <OwnerProdukDetail2 selectedUser={r} selectedItem={el} />
-              <Space5 />
-              {statusOrder === 'Konfirmasi ke Owner' && !editPesan &&
-                <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiOrder}
-                  disabled={statusOrder === 'Konfirmasi ke Owner' ? false : true}
-                >
-                  Verifikasi Order
-                </Button>}
-              <Portal>
-                <Dialog
-                  visible={dlgVerifikasiOrder}
-                  onDismiss={_hideDialogVerifikasiOrder}>
-                  <Dialog.Title>Notify</Dialog.Title>
-                  <Dialog.Content>
-                    <Paragraph>Verifikasi Order sudah OK?</Paragraph>
-                  </Dialog.Content>
-                  <Dialog.Actions>
-                    <Button mode="contained" onPress={() => _onKonfirmasiKeReseller(r, el)}>OK</Button>
-                  </Dialog.Actions>
-                </Dialog>
-              </Portal>
-            </View>
-          )
+          (r.statusOrderItem === 'Jumlah pesan di konfirm Admin' || r.statusOrderItem === 'Jumlah pesanan di simpan') && !editPesan &&
+          <View><IconButton icon="edit"
+            size={20}
+            onPress={() => setEditPesan(true)}
+          /></View>
+        }
+        {
+          editPesan &&
+          <View>
+            <TextInput
+              label='Jumlah Pesan'
+              keyboardType='number-pad'
+              value={txtJumlahPesan}
+              onChangeText={(a) => setTxtJumlahPesan(a)}
+            />
+            <Space2 />
+            <Button onPress={() => setEditPesan(false)}
+            >
+              Cancel
+                  </Button>
+            <Button icon="add-circle-outline" mode="contained" onPress={_showDialogPesan}
+              disabled={txtJumlahPesan === '0' || txtJumlahPesan === ''}
+            >
+              Pesan OK
+            </Button>
+          </View>
         }
 
-
-
+        <Portal>
+          <Dialog
+            visible={dlgPesan}
+            onDismiss={_hideDialogPesan}>
+            <Dialog.Title>Notify</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Jumlah Pesan sudah OK?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button mode="contained" onPress={() => _onEditPesanOK(r, s, jumlah2Total)}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </View>
-    }</View>
+    }
+    </View>
   );
 }
 

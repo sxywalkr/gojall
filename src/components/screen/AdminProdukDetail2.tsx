@@ -9,6 +9,7 @@ import {
 
 import styled from 'styled-components/native';
 import * as fb from '../../firebase/firebase';
+import AdminProdukDetail2Edit from '../screen/AdminProdukDetail2Edit';
 
 interface IProps {
   navigation: any;
@@ -150,14 +151,14 @@ function Page(props: IProps) {
   }
 
 
-  const _onVefirikasiPembayaran = (p: any, s: any) => {
-    fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
-      .update({
-        statusOrderItem: 'Pembayaran OK, proses kirim Barang',
-      });
-    setDlgVerifikasiPembayaran(false);
-    setProduk([]);
-  }
+  // const _onVefirikasiPembayaran = (p: any, s: any) => {
+  //   fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
+  //     .update({
+  //       statusOrderItem: 'Pembayaran OK, proses kirim Barang',
+  //     });
+  //   setDlgVerifikasiPembayaran(false);
+  //   setProduk([]);
+  // }
 
   const _onOrderClosed = (p: any, s: any) => {
     fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
@@ -180,31 +181,14 @@ function Page(props: IProps) {
     setLoading(true);
   }
 
-  const _onEditPesanOK = (p: any, q: any, r: any) => {
-    console.log(p, q, r)
-    fb.db.ref('items/admin/' + q.idItem + '/' + p.userIdReseller)
-      .update({
-        jumlah2ItemOrder: parseInt(txtJumlahPesan),
-        statusOrderItem: 'Jumlah pesan di konfirm Admin'
-      });
-    fb.db.ref('items/admin/' + q.idItem)
-      .update({
-        jumlah2Total: parseInt(r) - parseInt(p.jumlah2Item) + parseInt(txtJumlahPesan),
-      });
-    setEditPesan(false);
-    setDlgPesan(false);
-    setProduk([]);
-    setLoading(true);
-  }
-
   const _showDialogVerifikasiOrder = () => setDlgVerifikasiOrder(true);
   const _hideDialogVerifikasiOrder = () => setDlgVerifikasiOrder(false);
-  const _showDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(true);
-  const _hideDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(false);
+  // const _showDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(true);
+  // const _hideDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(false);
   const _showDialogOrderClosed = () => setDlgOrderClosed(true);
   const _hideDialogOrderClosed = () => setDlgOrderClosed(false);
-  const _showDialogPesan = () => setDlgPesan(true);
-  const _hideDialogPesan = () => setDlgPesan(false);
+  // const _showDialogPesan = () => setDlgPesan(true);
+  // const _hideDialogPesan = () => setDlgPesan(false);
 
   // console.log(editPesan, produk)
 
@@ -219,70 +203,20 @@ function Page(props: IProps) {
           <Divider />
           {
             !!produk && produk.map((el: any, key) =>
-              <View key={key} style={el.statusOrderItem === 'Jumlah pesanan di simpan' && !editPesan ? { flexDirection: 'row', alignItems: 'center' } : { flexDirection: 'column' } }>
+              <View key={key}>
                 <Space5 />
-                <View>
-                  <Text>
-                    {el.userNameReseller} :
-                    {el.jumlah2Item} /
-                    {' '}{el.jumlah2ItemPercentage}% /
-                    {' '}{el.jumlah2ItemOrder}
-                  </Text>
-                  <Text>Status: {el.statusOrderItem}</Text>
-                </View>
-                <Space5 />
-                {
-                  (el.statusOrderItem === 'Jumlah pesanan di simpan' && !editPesan) &&
-                  <View><IconButton icon="edit"
-                    size={20}
-                    onPress={() => setEditPesan(true)}
-                  /></View>
-                }
-                {
-                  editPesan &&
-                  <View>
-                    <TextInput
-                      label='Jumlah Pesan'
-                      keyboardType='number-pad'
-                      value={txtJumlahPesan}
-                      onChangeText={(a) => setTxtJumlahPesan(a)}
-                    />
-                    <Space2 />
-                    <Button onPress={() => setEditPesan(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button icon="add-circle-outline" mode="contained" onPress={_showDialogPesan}
-                      disabled={txtJumlahPesan === '0' || txtJumlahPesan === ''}
-                    >
-                      Pesan OK
-                    </Button>
-                  </View>
-                }
-                {el.statusOrderItem === 'Pembayaran Selesai, menunggu verifikasi Admin' &&
+                <AdminProdukDetail2Edit selectedUser={r} selectedItem={el} />
+                {/* {el.statusOrderItem === 'Pembayaran Selesai, menunggu verifikasi Admin' &&
                   <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiPembayaran}
                   >
                     Verifikasi Pembayaran OK
-                  </Button>}
+                  </Button>} */}
                 {el.statusOrderItem === 'Barang diterima' &&
                   <Button icon="add-circle-outline" mode="contained" onPress={_showDialogOrderClosed}
                   >
                     Order closed
                   </Button>}
-                <Portal>
-                  <Dialog
-                    visible={dlgPesan}
-                    onDismiss={_hideDialogPesan}>
-                    <Dialog.Title>Notify</Dialog.Title>
-                    <Dialog.Content>
-                      <Paragraph>Jumlah Pesan sudah OK?</Paragraph>
-                    </Dialog.Content>
-                    <Dialog.Actions>
-                      <Button mode="contained" onPress={() => _onEditPesanOK(el, r, jumlah2Total)}>OK</Button>
-                    </Dialog.Actions>
-                  </Dialog>
-                </Portal>
-                <Portal>
+                {/* <Portal>
                   <Dialog
                     visible={dlgVerifikasiPembayaran}
                     onDismiss={_hideDialogVerifikasiPembayaran}>
@@ -294,7 +228,7 @@ function Page(props: IProps) {
                       <Button mode="contained" onPress={() => _onVefirikasiPembayaran(el, r)}>OK</Button>
                     </Dialog.Actions>
                   </Dialog>
-                </Portal>
+                </Portal> */}
                 <Portal>
                   <Dialog
                     visible={dlgOrderClosed}
