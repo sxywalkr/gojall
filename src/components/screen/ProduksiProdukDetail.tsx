@@ -10,6 +10,8 @@ import {
 import styled from 'styled-components/native';
 import * as fb from '../../firebase/firebase';
 
+import ProduksiProdukDetail2 from '../screen/ProduksiProdukDetail2';
+
 interface IProps {
   navigation: any;
   selectedItem: any;
@@ -57,7 +59,7 @@ function UserProdukDetail(props: IProps) {
     return () => {
       fb.db.ref('items').off;
     };
-  }, [loading]);
+  }, [produk]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,43 +122,12 @@ function UserProdukDetail(props: IProps) {
               disabled={txtJumlahPesan === '0' || txtJumlahPesan === ''}
             >
               Simpan
-        </Button>
+          </Button>
           </View>}
         {
           !!produk && produk.map((el: any, key) =>
             <View key={key}>
-              <Space5 />
-              <Text>
-                {el.userNameReseller} : {el.statusOrderItem} / Resi : {el.nomorResi}
-              </Text>
-              <Space5 />
-              {!!el.statusOrderItem && el.statusOrderItem === 'Pembayaran OK, proses kirim Barang' &&
-                <View>
-                  <TextInput
-                    label='Nomor Resi'
-                    value={nomorResi}
-                    onChangeText={(a) => setNomorResi(a)}
-                  />
-                  <Space2 />
-                  <Button icon="add-circle-outline" mode="contained" onPress={_showDialogKirimBarang}
-                    disabled={nomorResi === ''}
-                  >
-                    Kirim Barang
-                  </Button>
-                </View>}
-              <Portal>
-                <Dialog
-                  visible={dlgKirimBarang}
-                  onDismiss={_hideDialogKirimBarang}>
-                  <Dialog.Title>Notify</Dialog.Title>
-                  <Dialog.Content>
-                    <Paragraph>Barang {el.userNameReseller} sudah dikirim?</Paragraph>
-                  </Dialog.Content>
-                  <Dialog.Actions>
-                    <Button mode="contained" onPress={() => _onKirimBarang(el, r)}>OK</Button>
-                  </Dialog.Actions>
-                </Dialog>
-              </Portal>
+              <ProduksiProdukDetail2 selectedItem={el} selectedUser={r} />
             </View>
           )
         }
@@ -175,7 +146,6 @@ function UserProdukDetail(props: IProps) {
         </Portal>
       </View>}
     </View>
-
   );
 }
 

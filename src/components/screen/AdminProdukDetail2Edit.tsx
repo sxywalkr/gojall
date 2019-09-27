@@ -129,10 +129,33 @@ function Page(props: IProps) {
     setLoading(true);
   }
 
+  const _onOrderClosed = (p: any, s: any) => {
+    fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
+      .update({
+        statusOrderItem: '---',
+      });
+    fb.db.ref('items/admin/' + s.idItem)
+      .update({
+        jumlah1Total: 0,
+        jumlah2Total: 0,
+        statusOrder: 'Open Order',
+        statusProduksi: 'Update stok Produksi NOK',
+      });
+    fb.db.ref('items/admin')
+      .update({
+        jumlahOrder: parseInt(jumlahOrder) - 1,
+      });
+    setDlgOrderClosed(false);
+    setProduk([]);
+    setLoading(true);
+  }
+
   const _showDialogPesan = () => setDlgPesan(true);
   const _hideDialogPesan = () => setDlgPesan(false);
   const _showDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(true);
   const _hideDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(false);
+  const _showDialogOrderClosed = () => setDlgOrderClosed(true);
+  const _hideDialogOrderClosed = () => setDlgOrderClosed(false);
 
   return (
     <View>
@@ -181,6 +204,11 @@ function Page(props: IProps) {
             >
               Verifikasi Pembayaran OK
             </Button>}
+          {r.statusOrderItem === 'Barang diterima' &&
+            <Button icon="add-circle-outline" mode="contained" onPress={_showDialogOrderClosed}
+            >
+              Order closed
+            </Button>}
           <Portal>
             <Dialog
               visible={dlgPesan}
@@ -204,6 +232,19 @@ function Page(props: IProps) {
               </Dialog.Content>
               <Dialog.Actions>
                 <Button mode="contained" onPress={() => _onVefirikasiPembayaran(r, s)}>OK</Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+          <Portal>
+            <Dialog
+              visible={dlgOrderClosed}
+              onDismiss={_hideDialogOrderClosed}>
+              <Dialog.Title>Notify</Dialog.Title>
+              <Dialog.Content>
+                <Paragraph>Order {r.userNameReseller} closed?</Paragraph>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button mode="contained" onPress={() => _onOrderClosed(r, s)}>OK</Button>
               </Dialog.Actions>
             </Dialog>
           </Portal>

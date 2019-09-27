@@ -88,6 +88,20 @@ function OwnerProdukDetail(props: IProps) {
     setLoading(true);
   }
 
+  const _onKonfirmasiKeReseller = (s: any, t: any) => {
+    // * save to firebase 
+    // fb.db.ref('items/admin/' + s.idItem)
+    //   .update({
+    //     statusOrder: 'Order OK, konfirmasi ke Reseller',
+    //   });
+    fb.db.ref('items/admin/' + s.idItem + '/' + t.userIdReseller)
+      .update({
+        statusOrderItem: 'Order OK, konfirmasi ke Reseller',
+      });
+    setDlgVerifikasiOrder(false)
+    setLoading(true);
+  }
+
   const _showDialogVerifikasiOrder = () => setDlgVerifikasiOrder(true);
   const _hideDialogVerifikasiOrder = () => setDlgVerifikasiOrder(false);
   const _showDialogPesan = () => setDlgPesan(true);
@@ -116,6 +130,14 @@ function OwnerProdukDetail(props: IProps) {
             onPress={() => setEditPesan(true)}
           /></View>
         }
+        {(r.statusOrderItem === 'Jumlah pesan di konfirm Admin' || r.statusOrderItem === 'Jumlah pesanan di simpan') && !editPesan &&
+          <View>
+          <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiOrder}
+          // disabled={statusOrder === 'Konfirmasi ke Owner' ? false : true}
+          >
+            Verifikasi Order
+          </Button>
+          </View>}
         {
           editPesan &&
           <View>
@@ -144,10 +166,23 @@ function OwnerProdukDetail(props: IProps) {
             onDismiss={_hideDialogPesan}>
             <Dialog.Title>Notify</Dialog.Title>
             <Dialog.Content>
-              <Paragraph>Jumlah Pesan sudah OK?</Paragraph>
+              <Paragraph>Jumlah Pesan {r.userNameReseller} sudah OK?</Paragraph>
             </Dialog.Content>
             <Dialog.Actions>
               <Button mode="contained" onPress={() => _onEditPesanOK(r, s, jumlah2Total)}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
+        <Portal>
+          <Dialog
+            visible={dlgVerifikasiOrder}
+            onDismiss={_hideDialogVerifikasiOrder}>
+            <Dialog.Title>Notify</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Verifikasi Order {r.userNameReseller} sudah OK?</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button mode="contained" onPress={() => _onKonfirmasiKeReseller(s, r)}>OK</Button>
             </Dialog.Actions>
           </Dialog>
         </Portal>

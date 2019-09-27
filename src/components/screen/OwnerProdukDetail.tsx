@@ -60,37 +60,37 @@ function OwnerProdukDetail(props: IProps) {
     };
   }, [produk]);
 
-  const _onKonfirmasiKeReseller = (s: any, t: any) => {
-    // * save to firebase 
-    fb.db.ref('items/admin/' + s.idItem)
-      .update({
-        statusOrder: 'Order OK, konfirmasi ke Reseller',
-      });
-    fb.db.ref('items/admin/' + s.idItem + '/' + t.userIdReseller)
-      .update({
-        statusOrderItem: 'Order OK, konfirmasi ke Reseller',
-      });
-    setDlgVerifikasiOrder(false)
-    setLoading(true);
-  }
+  // const _onKonfirmasiKeReseller = (s: any, t: any) => {
+  //   // * save to firebase 
+  //   fb.db.ref('items/admin/' + s.idItem)
+  //     .update({
+  //       statusOrder: 'Order OK, konfirmasi ke Reseller',
+  //     });
+  //   fb.db.ref('items/admin/' + s.idItem + '/' + t.userIdReseller)
+  //     .update({
+  //       statusOrderItem: 'Order OK, konfirmasi ke Reseller',
+  //     });
+  //   setDlgVerifikasiOrder(false)
+  //   setLoading(true);
+  // }
 
-  const _onEditPesanOK = (p: any, q: any, r: any) => {
-    // console.log(p, q, r)
-    fb.db.ref('items/admin/' + q.idItem + '/' + p.userIdReseller)
-      .update({
-        jumlah2ItemOrder: parseInt(txtJumlahPesan),
-        statusOrderItem: 'Order OK, konfirmasi ke Reseller',
-      });
-    fb.db.ref('items/admin/' + q.idItem)
-      .update({
-        jumlah2Total: parseInt(r) - parseInt(p.jumlah2Item) + parseInt(txtJumlahPesan),
-        statusOrder: 'Order OK, konfirmasi ke Reseller',
-      });
-    setEditPesan(false);
-    setDlgPesan(false);
-    setProduk([]);
-    setLoading(true);
-  }
+  // const _onEditPesanOK = (p: any, q: any, r: any) => {
+  //   // console.log(p, q, r)
+  //   fb.db.ref('items/admin/' + q.idItem + '/' + p.userIdReseller)
+  //     .update({
+  //       jumlah2ItemOrder: parseInt(txtJumlahPesan),
+  //       statusOrderItem: 'Order OK, konfirmasi ke Reseller',
+  //     });
+  //   fb.db.ref('items/admin/' + q.idItem)
+  //     .update({
+  //       jumlah2Total: parseInt(r) - parseInt(p.jumlah2Item) + parseInt(txtJumlahPesan),
+  //       statusOrder: 'Order OK, konfirmasi ke Reseller',
+  //     });
+  //   setEditPesan(false);
+  //   setDlgPesan(false);
+  //   setProduk([]);
+  //   setLoading(true);
+  // }
 
   const _showDialogVerifikasiOrder = () => setDlgVerifikasiOrder(true);
   const _hideDialogVerifikasiOrder = () => setDlgVerifikasiOrder(false);
@@ -111,26 +111,26 @@ function OwnerProdukDetail(props: IProps) {
             <View key={key} >
               <Space5 />
               <OwnerProdukDetail2 selectedUser={r} selectedItem={el} />
-              <Space5 />
-              {statusOrder === 'Konfirmasi ke Owner' && !editPesan &&
+              {/* <Space5 /> */}
+              {/* {statusOrder === 'Konfirmasi ke Owner' && !editPesan &&
                 <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiOrder}
                   disabled={statusOrder === 'Konfirmasi ke Owner' ? false : true}
                 >
                   Verifikasi Order
-                </Button>}
-              <Portal>
+                </Button>} */}
+              {/* <Portal>
                 <Dialog
                   visible={dlgVerifikasiOrder}
                   onDismiss={_hideDialogVerifikasiOrder}>
                   <Dialog.Title>Notify</Dialog.Title>
                   <Dialog.Content>
-                    <Paragraph>Verifikasi Order sudah OK?</Paragraph>
+                    <Paragraph>Verifikasi Order {r.userName} sudah OK?</Paragraph>
                   </Dialog.Content>
                   <Dialog.Actions>
                     <Button mode="contained" onPress={() => _onKonfirmasiKeReseller(r, el)}>OK</Button>
                   </Dialog.Actions>
                 </Dialog>
-              </Portal>
+              </Portal> */}
             </View>
           )
         }

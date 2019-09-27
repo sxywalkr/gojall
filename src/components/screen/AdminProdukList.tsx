@@ -62,7 +62,7 @@ function AdminProduksList(props: IProps) {
         return () => {
             fb.db.ref('items/admin').off;
         };
-    }, [statusOrderAll]);
+    }, [loading]);
 
     useEffect(() => {
         const fetchData = async () => {

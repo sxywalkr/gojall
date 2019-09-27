@@ -31,15 +31,13 @@ function AdminProdukDetail(props: IProps) {
   const [statusOrder, setStatusOrder] = useState('');
   const [produk, setProduk] = useState([]);
 
-  // const { state, dispatch } = React.useContext(AppContext);
   const { r } = props.navigation.state.params;
 
   useEffect(() => {
     const fetchData = async () => {
       const res = await fb.db.ref('items/admin/' + r.idItem).once('value');
       const r1: any = [];
-      res.forEach((el) => {
-        // console.log(el.hasChildren());
+      res.forEach((el: any) => {
         el.hasChildren()
           ? r1.push({
             userIdReseller: el.val().userId,
@@ -48,10 +46,9 @@ function AdminProdukDetail(props: IProps) {
             jumlah2ItemOrder: el.val().jumlah2ItemOrder,
             statusOrderItem: el.val().statusOrderItem,
           })
-          : console.log('!hasChildren')
+          : ''
           ;
       });
-      // r1.splice(-1, 1); // remove last item of array
       setProduk(r1);
       setJumlah1Total(res.val().jumlah1Total);
       setJumlah2Total(res.val().jumlah2Total);
@@ -61,9 +58,7 @@ function AdminProdukDetail(props: IProps) {
     return () => {
       fb.db.ref('items').off;
     };
-  }, []);
-
-  // console.log(produk);
+  }, [produk]);
 
   const _onSubmit = (p: any, q: any, r: any, s: any) => {
     if (parseInt(jumlah2Total) > parseInt(jumlah1Total)) {
@@ -86,12 +81,6 @@ function AdminProdukDetail(props: IProps) {
       .update({
         statusOrder: 'Konfirmasi ke Owner'
       });
-    // hitung jumlah item di array
-    // const x = 0;
-    // const a = p.reduce((accumulator: any, currentValue: any) => {
-    //   return accumulator + currentValue.jumlah2ItemOrder;
-    // }, x);
-    // console.log('a', a);
     props.navigation.goBack();
   }
 
@@ -108,13 +97,10 @@ function AdminProdukDetail(props: IProps) {
       });
   }
   const _onVefirikasiPembayaran = (p: any, s: any) => {
-    // console.log(p)
-    // p.forEach((el: any) => {
     fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
       .update({
         statusOrderItem: 'Verifikasi Pembayaran OK',
       })
-    // });
     props.navigation.goBack();
   }
 
@@ -141,33 +127,27 @@ function AdminProdukDetail(props: IProps) {
               ? Math.floor((parseInt(el.jumlah2Item) / parseInt(jumlah2Total)) * parseInt(jumlah1Total))
               : el.jumlah2Item}</Text>
             <Text>Status Pembayaran: {el.statusOrderItem}</Text>
-            <Button icon="add-circle-outline" mode="contained" onPress={() => _onVefirikasiPembayaran(el, r)}
+            {/* <Button icon="add-circle-outline" mode="contained" onPress={() => _onVefirikasiPembayaran(el, r)}
               disabled={el.statusOrderItem === 'Pembayaran Selesai, menunggu verifikasi Admin' ? false : true}
             >
               Verifikasi Pembayaran
-            </Button>
+            </Button> */}
             <Divider />
           </View>
         )
       }
       <Space8 />
-      <Space8 />
-      <Button icon="add-circle-outline" mode="contained" onPress={() => _onCloseOrder(produk, jumlah1Total, jumlah2Total, r)}
+      {/* <Button icon="add-circle-outline" mode="contained" onPress={() => _onCloseOrder(produk, jumlah1Total, jumlah2Total, r)}
         disabled={statusOrder === 'Open Order' ? false : true}
       >
         Close Order
-      </Button>
+      </Button> */}
       <Space8 />
       <Button icon="add-circle-outline" mode="contained" onPress={() => _onSubmit(produk, jumlah1Total, jumlah2Total, r)}
         disabled={statusOrder === 'Close Order' ? false : true}
       >
         Proses order, konfirmasi ke Owner
       </Button>
-      {/* <Button icon="add-circle-outline" mode="contained" onPress={() => _onSubmit(produk, jumlah1Total, jumlah2Total, r)}
-        disabled={statusOrder === 'Pembayaran Selesai, menunggu verifikasi Admin' ? false : true}
-      >
-        Pembayaran OK
-      </Button> */}
     </View>
 
   );

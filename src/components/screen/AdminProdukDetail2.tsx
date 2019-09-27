@@ -160,33 +160,33 @@ function Page(props: IProps) {
   //   setProduk([]);
   // }
 
-  const _onOrderClosed = (p: any, s: any) => {
-    fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
-      .update({
-        statusOrderItem: '---',
-      });
-    fb.db.ref('items/admin/' + s.idItem)
-      .update({
-        jumlah1Total: 0,
-        jumlah2Total: 0,
-        statusOrder: '---',
-        statusProduksi: '---',
-      });
-    fb.db.ref('items/admin')
-      .update({
-        jumlahOrder: parseInt(jumlahOrder) - 1,
-      });
-    setDlgOrderClosed(false);
-    setProduk([]);
-    setLoading(true);
-  }
+  // const _onOrderClosed = (p: any, s: any) => {
+  //   fb.db.ref('items/admin/' + s.idItem + '/' + p.userIdReseller)
+  //     .update({
+  //       statusOrderItem: '---',
+  //     });
+  //   fb.db.ref('items/admin/' + s.idItem)
+  //     .update({
+  //       jumlah1Total: 0,
+  //       jumlah2Total: 0,
+  //       statusOrder: 'Open Order',
+  //       statusProduksi: 'Update stok Produksi NOK',
+  //     });
+  //   fb.db.ref('items/admin')
+  //     .update({
+  //       jumlahOrder: parseInt(jumlahOrder) - 1,
+  //     });
+  //   setDlgOrderClosed(false);
+  //   setProduk([]);
+  //   setLoading(true);
+  // }
 
   const _showDialogVerifikasiOrder = () => setDlgVerifikasiOrder(true);
   const _hideDialogVerifikasiOrder = () => setDlgVerifikasiOrder(false);
   // const _showDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(true);
   // const _hideDialogVerifikasiPembayaran = () => setDlgVerifikasiPembayaran(false);
-  const _showDialogOrderClosed = () => setDlgOrderClosed(true);
-  const _hideDialogOrderClosed = () => setDlgOrderClosed(false);
+  // const _showDialogOrderClosed = () => setDlgOrderClosed(true);
+  // const _hideDialogOrderClosed = () => setDlgOrderClosed(false);
   // const _showDialogPesan = () => setDlgPesan(true);
   // const _hideDialogPesan = () => setDlgPesan(false);
 
@@ -211,11 +211,11 @@ function Page(props: IProps) {
                   >
                     Verifikasi Pembayaran OK
                   </Button>} */}
-                {el.statusOrderItem === 'Barang diterima' &&
+                {/* {el.statusOrderItem === 'Barang diterima' &&
                   <Button icon="add-circle-outline" mode="contained" onPress={_showDialogOrderClosed}
                   >
                     Order closed
-                  </Button>}
+                  </Button>} */}
                 {/* <Portal>
                   <Dialog
                     visible={dlgVerifikasiPembayaran}
@@ -229,27 +229,15 @@ function Page(props: IProps) {
                     </Dialog.Actions>
                   </Dialog>
                 </Portal> */}
-                <Portal>
-                  <Dialog
-                    visible={dlgOrderClosed}
-                    onDismiss={_hideDialogOrderClosed}>
-                    <Dialog.Title>Notify</Dialog.Title>
-                    <Dialog.Content>
-                      <Paragraph>Order {el.userNameReseller} closed?</Paragraph>
-                    </Dialog.Content>
-                    <Dialog.Actions>
-                      <Button mode="contained" onPress={() => _onOrderClosed(el, r)}>OK</Button>
-                    </Dialog.Actions>
-                  </Dialog>
-                </Portal>
+                
               </View>
             )
           }
           <Space8 />
-          {statusOrderAll === 'Close Order' && statusOrder === 'Open Order' && statusProduksi === 'Update stok Produksi done' &&
+          {(statusOrderAll === 'Close Order' && statusOrder === 'Open Order' && statusProduksi === 'Update stok Produksi done') &&
             <Button icon="add-circle-outline" mode="contained" onPress={_showDialogVerifikasiOrder}
             >
-              Set Initial order
+              Set Persentase Pesanan
           </Button>}
           <Portal>
             <Dialog
@@ -257,7 +245,7 @@ function Page(props: IProps) {
               onDismiss={_hideDialogVerifikasiOrder}>
               <Dialog.Title>Notify</Dialog.Title>
               <Dialog.Content>
-                <Paragraph>Set Initial Order?</Paragraph>
+                <Paragraph>Set Persentase Pesanan?</Paragraph>
               </Dialog.Content>
               <Dialog.Actions>
                 <Button mode="contained" onPress={() => _onVerifikasiOrder(produk, jumlah1Total, jumlah2Total, r)}>OK</Button>
